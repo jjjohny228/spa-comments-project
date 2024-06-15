@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+
+  postgres:
+    image: postgres:16
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+    - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+volumes:
+  postgres_data:
