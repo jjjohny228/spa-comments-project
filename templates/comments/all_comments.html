@@ -1,39 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ post.title }}</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .comment {
-            margin-bottom: 20px;
-        }
-        .reply-form {
-            display: none;
-        }
-    </style>
-</head>
-<body>
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title %}Comments{% endblock %}
+{% block vendor_js %}
+{{ block.super }}}
+        <!-- Theme CSS styles for comments -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{% static 'js/base.js' %}"></script>
+{% endblock vendor_js %}
+{% block content %}
     <h2>Comments</h2>
     <div id="comments">
         {% for comment in comments %}
             {% include 'partials/_comment.html' with comment=comment %}
         {% endfor %}
     </div>
-
     <h3>Leave a Comment</h3>
     <form method="post" action="{% url 'comments:all' %}">
         {% csrf_token %}
-        {{ comment_form.as_p }}
+        {{ form|crispy }}
         <button type="submit">Post Comment</button>
     </form>
-
-    <script>
-        $(document).ready(function() {
-            $('.reply-btn').click(function() {
-                $(this).siblings('.reply-form').toggle();
-            });
-        });
-    </script>
-</body>
-</html>
+{% endblock %}

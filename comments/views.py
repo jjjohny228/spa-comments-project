@@ -21,6 +21,6 @@ def post_detail(request):
 
     return render(request, 'comments/all_comments.html', {
         'comments': comments,
-        'comment_form': comment_form,
+        'form': comment_form,
         'new_comment': new_comment
     })

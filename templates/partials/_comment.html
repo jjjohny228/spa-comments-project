@@ -1,16 +1,18 @@
 {% load comment_extras %}
-
-<div class="comment" style="margin-left: {{ comment.level|multiply:20 }}px;">
-    <p><strong>{{ comment.author }}</strong></p>
+{% load crispy_forms_tags %}
+<div class="comment"
+     style="margin-left: {{ comment.level|multiply:20 }}px">
+    <p>
+        <strong>{{ comment.author }}</strong>
+    </p>
     <p>{{ comment.text }}</p>
     <button class="reply-btn">Reply</button>
     <form class="reply-form" method="post" action=".">
         {% csrf_token %}
-        {{ comment_form.as_p }}
+        {{ form|crispy }}
         <input type="hidden" name="parent_id" value="{{ comment.id }}">
         <button type="submit">Post Reply</button>
     </form>
-
     {% for child in comment.get_children %}
         {% include 'partials/_comment.html' with comment=child %}
     {% endfor %}
