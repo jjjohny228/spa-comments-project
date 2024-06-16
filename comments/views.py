@@ -4,7 +4,7 @@ from .forms import CommentForm
 
 
 def post_detail(request):
-    comments = Comment.objects.all()
+    comments = Comment.objects.filter(level=0)
     new_comment = None
 
     if request.method == 'POST':

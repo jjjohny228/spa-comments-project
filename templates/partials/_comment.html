@@ -2,18 +2,40 @@
 {% load crispy_forms_tags %}
 <div class="comment"
      style="margin-left: {{ comment.level|multiply:20 }}px">
-    <p>
-        <strong>{{ comment.author }}</strong>
-    </p>
-    <p>{{ comment.text }}</p>
-    <button class="reply-btn">Reply</button>
+    <div class="row" style="margin-left: {{ comment.level|multiply:20 }}px">
+        <!-- Image column -->
+        <div class="col-auto">
+            <div class="ava">
+                <img class="rounded-circle shadow-1-strong me-3"
+                     src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp"
+                     alt="avatar"
+                     width="65"
+                     height="65" />
+            </div>
+        </div>
+        <!-- Text column -->
+        <div class="col">
+            <div class="message">
+                <div class="info">
+                    <span class="fs-6 fw-medium">{{ comment.author }}</span> <span class="small">- {{ comment.created_at|date:"d.m.Y" }} at {{ comment.created_at|date:"H:i" }}</span>
+                </div>
+                <div class="text">
+                    <span>{{ comment.text }}</span>
+                </div>
+                <div class="actions">
+                    <a href="javascript:void(0);" class="reply-btn">Reply</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Reply form -->
     <form class="reply-form" method="post" action=".">
         {% csrf_token %}
         {{ form|crispy }}
         <input type="hidden" name="parent_id" value="{{ comment.id }}">
-        <button type="submit">Post Reply</button>
+        <button type="submit">Submit</button>
     </form>
-    {% for child in comment.get_children %}
-        {% include 'partials/_comment.html' with comment=child %}
-    {% endfor %}
 </div>
+{% for child in comment.get_children %}
+    {% include 'partials/_comment.html' with comment=child %}
+{% endfor %}

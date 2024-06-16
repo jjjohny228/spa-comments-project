@@ -3,18 +3,28 @@
 {% load static %}
 {% block title %}Comments{% endblock %}
 {% block vendor_js %}
-{{ block.super }}}
-        <!-- Theme CSS styles for comments -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="{% static 'js/base.js' %}"></script>
+    {{ block.super }}}
+    <!-- Theme CSS styles for comments -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/base.js' %}"></script>
 {% endblock vendor_js %}
 {% block content %}
-    <h2>Comments</h2>
-    <div id="comments">
-        {% for comment in comments %}
-            {% include 'partials/_comment.html' with comment=comment %}
-        {% endfor %}
-    </div>
+    <section class="gradient-custom">
+        <div class="container my-5 py-5">
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-12 col-lg-10 col-xl-8">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h4 class="text-center mb-4 pb-2">Nested comments section</h4>
+                                    {% for comment in comments %}
+                                        {% include 'partials/_comment.html' with comment=comment %}
+                                    {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <h3>Leave a Comment</h3>
     <form method="post" action="{% url 'comments:all' %}">
         {% csrf_token %}
