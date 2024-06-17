@@ -29,9 +29,9 @@
         </div>
     </div>
     <!-- Reply form -->
-    <form class="reply-form" method="post" action=".">
+    <form class="reply-form" method="post" action="{% url 'comments:add' %}">
         {% csrf_token %}
-        {{ form|crispy }}
+        {{ comments_form|crispy }}
         <input type="hidden" name="parent_id" value="{{ comment.id }}">
         <button type="submit">Submit</button>
     </form>

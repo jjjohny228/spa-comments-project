@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from comments.views import post_detail
+from comments.views import CommentListView, CommentFormView
 
 app_name = 'comments'
 
 urlpatterns = [
-    path('', post_detail, name='all'),
+    path('', CommentListView.as_view(), name='all'),
+    path('', CommentFormView.as_view(), name='add'),
 ]

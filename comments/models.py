@@ -27,7 +27,7 @@ class Comment(MPTTModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class MPTTMeta:
-        order_insertion_by = ['created_at']
+        order_insertion_by = ['-created_at']
 
     def __str__(self):
         return self.text[:20]

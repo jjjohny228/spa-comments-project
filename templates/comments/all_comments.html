@@ -13,9 +13,9 @@
     <div class="col-lg-4">
         <div class="card p-4 m-3">
             <h3>Leave a Comment</h3>
-    <form method="post" action="{% url 'comments:all' %}">
+    <form method="post" action="{% url 'comments:add' %}">
         {% csrf_token %}
-        {{ form|crispy }}
+        {{ comments_form|crispy }}
         <button type="submit">Post Comment</button>
     </form>
         </div>
