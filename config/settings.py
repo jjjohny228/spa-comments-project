@@ -21,6 +21,7 @@ DEBUG = os.getenv('DEBUG_MODE') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
+INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
@@ -33,6 +34,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
+    'captcha',
+    'debug_toolbar',
     # Project Apps
     'comments.apps.CommentsConfig',
 ]
@@ -45,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -126,3 +130,7 @@ STATIC_URL = '/static/'
 # django-crispy-forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Captcha settings
+CAPTCHA_FONT_SIZE = 24
+CAPTCHA_LENGTH = 6
