@@ -19,7 +19,17 @@ class CommentListView(ListView):
     paginate_by = 5  # Adjust the number of comments per page
 
     def get_queryset(self):
-        return Comment.objects.filter(level=0)
+        order_by_element = self.request.GET.get('order_by')
+        order_by_element = 'created_at' if not order_by_element else order_by_element
+        order_dir_element = self.request.GET.get('order_dir')
+
+        # Default order is ascending, add '-' prefix for descending
+        if order_dir_element == 'asc':
+            order_by_element = order_by_element
+        else:
+            order_by_element = f'-{order_by_element}'
+
+        return Comment.objects.filter(level=0).order_by(order_by_element).prefetch_related('children')
 
     def get_context_data(self, **kwargs):
         """

@@ -134,3 +134,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Captcha settings
 CAPTCHA_FONT_SIZE = 24
 CAPTCHA_LENGTH = 6
+
+# Allowed file types for upload by user
+ALLOWED_IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'gif']
+ALLOWED_TEXT_FILE_EXTENSIONS = ['txt']

@@ -34,30 +34,33 @@
                                         aria-expanded="false">Order by</button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="dropdown-item" href="#">User name</a>
+                                        <a class="dropdown-item" href="?order_by=author&order_dir={{ request.GET.order_dir }}">User name</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">E-mail</a>
+                                        <a class="dropdown-item" href="?order_by=email&order_dir={{ request.GET.order_dir }}">E-mail</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">Creation time</a>
+                                        <a class="dropdown-item" href="?order_by=created_at&order_dir={{ request.GET.order_dir }}">Creation time</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-secondary">Ascending</button>
-                        <button type="button" class="btn btn-secondary">Descending</button>
+                        <button type="button" class="btn btn-secondary"><a class="dropdown-item" href="?order_by={{ request.GET.order_by }}&order_dir=asc">Ascending</a></button>
+                        <button type="button" class="btn btn-secondary"><a class="dropdown-item" href="?order_by={{ request.GET.order_by }}&order_dir=desc">Descending</a></button>
                     </div>
                 </div>
-                <h4 class="text-center mb-4 pb-2">Nested comments section</h4>
-                {% for comment in comments %}
+                <div class="mt-5">
+                    {% for comment in comments %}
                     {% include 'partials/_comment.html' with comment=comment %}
                 {% endfor %}
+                </div>
                 <div class="mt-5">
                     {% if comments %}
                         {% include 'partials/_pagination.html' %}
+                    {% else %}
+                    <p>There are no comment yet</p>
                     {% endif %}
                 </div>
             </div>
