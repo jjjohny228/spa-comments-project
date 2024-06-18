@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView, FormView
 from django.views.generic.edit import FormMixin
 from comments.models import Comment
 from .forms import CommentForm
@@ -44,7 +44,10 @@ class CommentFormView(FormMixin, View):
         Handle POST requests: instantiate a form instance with the passed
         POST variables and then check if it's valid.
         """
+        print(self.request.POST)
         form = self.get_form()
+        print(f'Is form valid: {form.is_valid()}')
+        print(form.errors)
         if form.is_valid():
             return self.form_valid(form)
         messages.error(self.request, _("Invalid data in 'text' field"))
@@ -56,27 +59,6 @@ class CommentFormView(FormMixin, View):
         if parent_id:
             new_comment.parent = get_object_or_404(Comment, id=parent_id)
         new_comment.save()
+        print('comment was saved')
         return super().form_valid(form)
 
-
-# def post_detail(request):
-#     comments = Comment.objects.filter(level=0)
-#     new_comment = None
-#
-#     if request.method == 'POST':
-#         comment_form = CommentForm(data=request.POST)
-#         if comment_form.is_valid():
-#             parent_id = request.POST.get('parent_id')
-#             new_comment = comment_form.save(commit=False)
-#             if parent_id:
-#                 new_comment.parent = Comment.objects.get(id=parent_id)
-#             new_comment.save()
-#             return redirect('comments:all')
-#     else:
-#         comment_form = CommentForm()
-#
-#     return render(request, 'comments/all_comments.html', {
-#         'comments': comments,
-#         'form': comment_form,
-#         'new_comment': new_comment
-#     })

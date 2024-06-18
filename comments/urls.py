@@ -6,5 +6,5 @@ app_name = 'comments'
 
 urlpatterns = [
     path('', CommentListView.as_view(), name='all'),
-    path('', CommentFormView.as_view(), name='add'),
+    path('add/', CommentFormView.as_view(), name='add'),
 ]
