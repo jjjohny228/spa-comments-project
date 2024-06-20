@@ -1,4 +1,4 @@
-FROM python:3.12.2-slim
+FROM python:3.12.2
 # declare ports which container exposess
 EXPOSE 8000
 
