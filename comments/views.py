@@ -1,12 +1,8 @@
-import os
-from typing import Any
-
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, CreateView, FormView
+from django.views.generic import ListView
 from django.views.generic.edit import FormMixin
 from comments.models import Comment
 from .forms import CommentForm
@@ -56,9 +52,7 @@ class CommentFormView(FormMixin, View):
         Handle POST requests: instantiate a form instance with the passed
         POST variables and then check if it's valid.
         """
-        print(self.request.POST)
         form = self.get_form()
-        print(form.errors)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
@@ -70,12 +64,10 @@ class CommentFormView(FormMixin, View):
             new_comment.parent = get_object_or_404(Comment, id=parent_id)
         new_comment.save()
         messages.success(self.request, 'Comment added successfully.')
-        print('comment was saved')
         return super().form_valid(form)
 
     def form_invalid(self, form):
         query_params = self.request.GET.dict()
-        print(f'Query parameters: {query_params}')
         messages.error(self.request, _("There was an error with your submission. Please correct the errors below."))
         return render(self.request, 'comments/all_comments.html',
                       {'comments_form': form, 'comments': Comment.objects.filter(level=0)})

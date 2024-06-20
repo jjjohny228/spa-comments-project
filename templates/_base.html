@@ -10,7 +10,7 @@
               rel="stylesheet"
               integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
               crossorigin="anonymous">
-        <link type="text/css" href="{% static 'css/base.css' %}" rel="stylesheet" />
+        <link type="text/css" href="{% static 'css/_base.css' %}" rel="stylesheet" />
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
@@ -19,17 +19,19 @@
             <header class="content-center py-4 text-white">
                 <h3 class="text-center">Spa</h3>
             </header>
-<!--            Messages block -->
+            <!--            Messages block -->
             <div class="messages m-3">
                 {% for message in messages %}
-  <div class="alert alert-dismissible {{ message.tags }}" role="alert">
-    <div>{{ message | safe }}</div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-{% endfor %}
+                    <div class="alert alert-dismissible {{ message.tags }}" role="alert">
+                        <div>{{ message | safe }}</div>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endfor %}
             </div>
             <!-- End of messages block -->
-
             <!-- Content block -->
             {% block content %}{% endblock %}
             <!-- End of content block -->

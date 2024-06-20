@@ -1,5 +1,4 @@
 import os
-import sys
 
 import dj_database_url
 
@@ -35,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -171,3 +172,10 @@ MESSAGE_TAGS = {
 
 # Objects per page
 DEFAULT_PAGE_SIZE = 25
+
+if not DEBUG:
+    # Turn on WhiteNoise storage backend that takes care of compressing static files
+    # and creating unique names for each version so they can safely be cached forever.
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    }

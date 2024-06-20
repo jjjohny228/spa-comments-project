@@ -27,8 +27,6 @@ class CommentListViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Create a SimpleUploadedFile from the buffer
-        file = SimpleUploadedFile('test.txt', b'test some bytes', content_type='text/plain')
         [G(Comment, level=0) for _ in range(30)]
         cls.url = reverse('comments:all')
 

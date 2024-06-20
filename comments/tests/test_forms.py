@@ -110,37 +110,3 @@ class CommentFormTest(TestCase):
         """
         rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
         super().tearDown(cls)
-
-    # def test_it_returns_form_error_for_big_text_file(self):
-    #     # Create a file content that exceeds 100 KB
-    #     invalid_file = SimpleUploadedFile('test.txt', b'test some bytes' * 1024 * 101, content_type='text/plain')
-    #     invalid_form_data = {
-    #         'author': 'test1author',
-    #         'email': 'some1@gmail.com',
-    #         'homepage': 'https://example.com',
-    #         'text': 'Test text',
-    #         'file': invalid_file,
-    #         'captcha_0': self.captcha_key,
-    #         'captcha_1': self.captcha_value,
-    #     }
-    #     form = self.form(data=invalid_form_data)
-    #     exception_text = 'File size must be less than 100KB.'
-    #     self.assertFalse(form.is_valid())
-    #     self.assertEqual(exception_text, form.errors['file'])
-    #
-    # def test_it_returns_form_error_for_invalid_file_type(self):
-    #     # Create a file content that exceeds 100 KB
-    #     invalid_file = SimpleUploadedFile('test_video.mov', b'test', content_type='video/mov')
-    #     invalid_form_data = {
-    #         'author': 'test1author',
-    #         'email': 'some1@gmail.com',
-    #         'homepage': 'https://example.com',
-    #         'text': 'Test text',
-    #         'file': invalid_file,
-    #         'captcha_0': self.captcha_key,
-    #         'captcha_1': self.captcha_value,
-    #     }
-    #     form = self.form(data=invalid_form_data)
-    #     exception_text = 'File size must be less than 100KB.'
-    #     self.assertFalse(form.is_valid())
-    #     self.assertEqual(exception_text, form.errors['file'])
