@@ -19,11 +19,22 @@
             <header class="content-center py-4 text-white">
                 <h3 class="text-center">Spa</h3>
             </header>
+<!--            Messages block -->
+            <div class="messages m-3">
+                {% for message in messages %}
+  <div class="alert alert-dismissible {{ message.tags }}" role="alert">
+    <div>{{ message | safe }}</div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endfor %}
+            </div>
+            <!-- End of messages block -->
+
             <!-- Content block -->
             {% block content %}{% endblock %}
             <!-- End of content block -->
             <!-- Footer -->
-            <div class="footer content-center text-white py-2 ps-3">
+            <div class="footer content-center text-white py-2 ps-3 fixed-bottom">
                 <p class="mb-0 p-auto">&copy; 2023 Ostroukh Hlib</p>
             </div>
             <!-- End of the footer -->

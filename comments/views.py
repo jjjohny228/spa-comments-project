@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from django.contrib import messages
@@ -10,13 +11,14 @@ from django.views.generic.edit import FormMixin
 from comments.models import Comment
 from .forms import CommentForm
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 
 class CommentListView(ListView):
     model = Comment
     template_name = 'comments/all_comments.html'
     context_object_name = 'comments'
-    paginate_by = 25  # Adjust the number of comments per page
+    paginate_by = settings.DEFAULT_PAGE_SIZE  # Adjust the number of comments per page
 
     def get_queryset(self):
         order_by_element = self.request.GET.get('order_by')
@@ -29,7 +31,7 @@ class CommentListView(ListView):
         else:
             order_by_element = f'-{order_by_element}'
 
-        return Comment.objects.filter(level=0).order_by(order_by_element).prefetch_related('children')
+        return Comment.objects.filter(level=0).order_by(order_by_element)
 
     def get_context_data(self, **kwargs):
         """
@@ -49,19 +51,17 @@ class CommentFormView(FormMixin, View):
         """
         return reverse_lazy('comments:all')
 
-    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
+    def post(self, request, *args, **kwargs):
         """
         Handle POST requests: instantiate a form instance with the passed
         POST variables and then check if it's valid.
         """
         print(self.request.POST)
         form = self.get_form()
-        print(f'Is form valid: {form.is_valid()}')
         print(form.errors)
         if form.is_valid():
             return self.form_valid(form)
-        messages.error(self.request, _("Invalid data in 'text' field"))
-        return redirect(self.get_success_url())
+        return self.form_invalid(form)
 
     def form_valid(self, form):
         parent_id = self.request.POST.get('parent_id')
@@ -69,11 +69,14 @@ class CommentFormView(FormMixin, View):
         if parent_id:
             new_comment.parent = get_object_or_404(Comment, id=parent_id)
         new_comment.save()
+        messages.success(self.request, 'Comment added successfully.')
         print('comment was saved')
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        query_params = self.request.GET.dict()
+        print(f'Query parameters: {query_params}')
         messages.error(self.request, _("There was an error with your submission. Please correct the errors below."))
         return render(self.request, 'comments/all_comments.html',
-                      {'comments_form': form, 'comments': self.get_queryset()})
+                      {'comments_form': form, 'comments': Comment.objects.filter(level=0)})
 

@@ -1,81 +1,61 @@
-import io
 import os
 import tempfile
+
 from http import HTTPStatus
 from shutil import rmtree
+from captcha.models import CaptchaStore
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test import override_settings
 from django.urls import reverse
-from django.utils import timezone
 from django_dynamic_fixture import G
-from PIL import Image
 
-from accounts.models import User
-from labels.models import Label
-from releases.models import Release
-from releases.models import TradeInfo
+from comments.models import Comment
 
 # Create a temporary file directory for testing
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
-class LabelCreateViewTest(TestCase):
+class CommentListViewTest(TestCase):
     """
-    This class test LabelCreateView.
-    It uses django_dynamic_fixture to generate User and Label objects.
+    This class tests pagination and comments listing per page and CommentListView.
+    It uses django_dynamic_fixture to generate User and Comment objects.
     """
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = G(User)
-        cls.url = reverse('labels:create')
+        # Create a SimpleUploadedFile from the buffer
+        file = SimpleUploadedFile('test.txt', b'test some bytes', content_type='text/plain')
+        [G(Comment, level=0) for _ in range(30)]
+        cls.url = reverse('comments:all')
 
     def setUp(self):
-        self.client.force_login(self.user)
         self.response = self.client.get(self.url)
 
-    def test_GET_it_returns_status_code_200(self):
+    def test_GET_it_returns_valid_code(self):
         self.assertEqual(self.response.status_code, HTTPStatus.OK)
 
-    def test_GET_it_contain_right_text(self):
-        self.assertContains(self.response, 'Enter label info')
-
     def test_GET_it_uses_right_template(self):
-        self.assertTemplateUsed(self.response, 'labels/add_label.html')
+        self.assertTemplateUsed('comments/all_comments.html')
 
-    def test_POST_it_handles_success_request(self):
-        post_response = self.client.post(
-            self.url,
-            {'name': 'Test Label', 'description': 'Test Description'},
-            user=self.user,
-        )
-        self.assertEqual(post_response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(Label.objects.filter(name='Test Label').count(), 1)
-        self.assertEqual(post_response.url, reverse('labels:my-labels'))
+    def test_GET_it_uses_pagination(self):
+        self.assertTrue('is_paginated' in self.response.context)
+        self.assertTrue(self.response.context['is_paginated'])
 
-    def test_POST_it_returns_error_if_similarly_named_label_already_exists_for_given_user(
-        self,
-    ):
-        Label.objects.create(name='Test Label', description='Test Description', owner=self.user)
+    def test_GET_it_returns_right_objects_number_per_page(self):
+        self.assertEqual(len(self.response.context['comments']), settings.DEFAULT_PAGE_SIZE)
 
-        # creating the same label
-        response = self.client.post(self.url, {'name': 'Test Label', 'description': 'Another Description'})
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertContains(response, 'Label name is not unique.')
+    def test_GET_it_returns_error_page_when_comments_page_is_out_of_range(self):
+        invalid_response = self.client.get(self.url + f'?page={5}')
+        self.assertTemplateUsed(invalid_response, 'common/errors/pages_error.html')
 
-    def test_GET_it_redirects_logged_out_user(self):
-        self.client.logout()
-        get_response = self.client.get(self.url)
-        self.assertRedirects(get_response, reverse('account_login') + '?next=' + self.url)
-
-    def test_POST_it_redirects_logged_out_user(self):
-        self.client.logout()
-        post_response = self.client.post(self.url, {'name': 'Test Label', 'description': 'Test Description'})
-        self.assertRedirects(post_response, reverse('account_login') + '?next=' + self.url)
+    def test_GET_it_contains_right_text_if_there_are_no_comments(self):
+        Comment.objects.all().delete()
+        response = self.client.get(self.url)
+        self.assertContains(response, 'There are no comments yet...')
 
     @classmethod
     def tearDown(cls):
@@ -87,62 +67,80 @@ class LabelCreateViewTest(TestCase):
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
-class LabelListViewTest(TestCase):
+class CommentViewTest(TestCase):
     """
-    This class tests pagination and labels listing per page and LabelListView.
-    It uses django_dynamic_fixture to generate User and Label objects.
-    """
+    This class test LabelCreateView.
+    It uses django_dynamic_fixture to generate User and Comment objects.
 
+    """
     @classmethod
     def setUpTestData(cls):
-        image = Image.new('RGB', (150, 150), color='red')
-        # Save the image to a BytesIO buffer
-        image_buffer = io.BytesIO()
-        image.save(image_buffer, format='JPEG')
-        # Create a SimpleUploadedFile from the buffer
-        logo = SimpleUploadedFile('test_image.jpg', image_buffer.getvalue())
-        G(Label, logo=logo, n=30)
-        cls.url = reverse('labels:list')
-        cls.user = G(User)
+        cls.url = reverse('comments:add')
+        cls.comment_image = SimpleUploadedFile('image.jpg', b'image content', content_type='image/jpeg')
+        # Get a CAPTCHA challenge
+        cls.captcha_key = CaptchaStore.generate_key()
+        cls.captcha_value = CaptchaStore.objects.get(hashkey=cls.captcha_key).response
+        cls.data = {
+                'author': 'user',
+                'email': 'some1@gmail.com',
+                'homepage': 'https://example.com',
+                'text': 'Test text',
+                'file': cls.comment_image,
+                'captcha_0': cls.captcha_key,
+                'captcha_1': cls.captcha_value,
+            }
 
-    def setUp(self):
-        self.client.force_login(self.user)
-        self.response = self.client.get(self.url)
+    def test_POST_it_handles_success_request(self):
+        post_response = self.client.post(self.url, self.data)
+        self.assertEqual(post_response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Comment.objects.filter(author='user').count(), 1)
+        self.assertEqual(post_response.url, reverse('comments:all'))
 
-    def test_GET_it_returns_valid_code(self):
-        self.assertEqual(self.response.status_code, HTTPStatus.OK)
+    def test_POST_it_returns_error_if_username_is_incorrect(self):
+        invalid_data = {
+            'author': 'user[]',
+            'email': 'some1@gmail.com',
+            'homepage': 'https://example.com',
+            'text': 'Test text',
+            'file': self.comment_image,
+            'captcha_0': self.captcha_key,
+            'captcha_1': self.captcha_value,
+        }
 
-    def test_GET_it_uses_right_template(self):
-        self.assertTemplateUsed('labels/all_labels.html')
+        response = self.client.post(self.url, invalid_data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'User Name can only contain letters and digits from the Latin alphabet.')
 
-    def test_GET_it_redirects_logged_out_user(self):
-        self.client.logout()
-        get_response = self.client.get(self.url)
-        # Check that it redirects to login page
-        self.assertRedirects(get_response, reverse('account_login') + '?next=' + self.url)
+    def test_POST_it_returns_error_if_captcha_is_incorrect(self):
+        invalid_data = {
+            'author': 'user',
+            'email': 'some1@gmail.com',
+            'homepage': 'https://example.com',
+            'text': 'Test text',
+            'file': self.comment_image,
+            'captcha_0': self.captcha_key,
+            'captcha_1': 'false',
+        }
 
-    def test_GET_it_uses_pagination(self):
-        self.assertTrue('is_paginated' in self.response.context)
-        self.assertTrue(self.response.context['is_paginated'])
+        response = self.client.post(self.url, invalid_data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'Invalid CAPTCHA')
 
-    def test_GET_it_returns_right_objects_number_per_page(self):
-        self.assertEqual(len(self.response.context['labels']), settings.DEFAULT_PAGE_SIZE)
+    def test_POST_it_returns_error_if_file_type_is_incorrect(self):
+        invalid_file = SimpleUploadedFile('test_video.mov', b'test', content_type='video/mov')
+        invalid_data = {
+            'author': 'user',
+            'email': 'some1@gmail.com',
+            'homepage': 'https://example.com',
+            'text': 'Test text',
+            'file': invalid_file,
+            'captcha_0': self.captcha_key,
+            'captcha_1': self.captcha_value,
+        }
 
-    def test_GET_it_returns_error_page_when_labels_page_is_out_of_range(self):
-        invalid_response = self.client.get(self.url + f'?page={5}')
-        self.assertTemplateUsed(invalid_response, 'common/errors/pages_misc_error.html')
-
-    def test_GET_it_contains_right_text_if_there_are_no_labels(self):
-        Label.objects.all().delete()
-        response = self.client.get(self.url)
-        self.assertContains(response, 'There are no labels so far.')
-
-    def test_GET_contains_correct_logo_thumbnail_resolution(self):
-        labels = self.response.context['labels']
-        for label in labels:
-            # Check if label's thumbnail URL contains correct resolution
-            self.assertIn(str(label.logo_thumbnail.width), self.response.content.decode())
-            self.assertIn(str(label.logo_thumbnail.height), self.response.content.decode())
+        response = self.client.post(self.url, invalid_data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'Invalid file type.')
 
     @classmethod
     def tearDown(cls):
