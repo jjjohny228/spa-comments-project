@@ -20,6 +20,9 @@ class CommentListView(ListView):
         order_by_element = self.request.GET.get('order_by')
         order_by_element = 'created_at' if not order_by_element else order_by_element
         order_dir_element = self.request.GET.get('order_dir')
+        parent_comment = self.request.GET.get('parent')
+        if parent_comment:
+            messages.info(self.request, 'Left your reply in left form')
 
         # Default order is ascending, add '-' prefix for descending
         if order_dir_element == 'asc':

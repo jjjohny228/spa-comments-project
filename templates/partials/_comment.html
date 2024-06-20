@@ -24,22 +24,11 @@
                     <span>{{ comment.text }}</span>
                 </div>
                 <div class="actions">
-                    <a href="javascript:void(0);" class="reply-btn">Reply</a>
+                    <a href="?parent={{ comment.pk }}" class="reply-btn">Reply</a>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Reply form -->
-    <form id="commentForm"
-          class="reply-form"
-          method="post"
-          action="{% url 'comments:add' %}"
-          enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ comments_form|crispy }}
-        <input type="hidden" name="parent_id" value="{{ comment.id }}">
-        <button type="submit">Submit</button>
-    </form>
 </div>
 {% for child in comment.get_children %}
     {% include 'partials/_comment.html' with comment=child %}
