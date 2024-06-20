@@ -30,7 +30,11 @@
         </div>
     </div>
     <!-- Reply form -->
-    <form class="reply-form" method="post" action="{% url 'comments:add' %}">
+    <form id="commentForm"
+          class="reply-form"
+          method="post"
+          action="{% url 'comments:add' %}"
+          enctype="multipart/form-data">
         {% csrf_token %}
         {{ comments_form|crispy }}
         <input type="hidden" name="parent_id" value="{{ comment.id }}">

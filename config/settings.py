@@ -1,8 +1,12 @@
 import os
+import sys
+
 import dj_database_url
 
 from pathlib import Path
 from dotenv import load_dotenv
+
+from django.conf.global_settings import STORAGES
 
 
 load_dotenv()
@@ -21,8 +25,6 @@ DEBUG = os.getenv('DEBUG_MODE') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
-INTERNAL_IPS = ['127.0.0.1']
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -35,7 +37,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'captcha',
-    'debug_toolbar',
+    'storages',
     # Project Apps
     'comments.apps.CommentsConfig',
 ]
@@ -48,7 +50,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -138,3 +139,21 @@ CAPTCHA_LENGTH = 6
 # Allowed file types for upload by user
 ALLOWED_IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'gif']
 ALLOWED_TEXT_FILE_EXTENSIONS = ['txt']
+
+# Variable that controls using s3 bucket
+USE_S3 = os.getenv('USE_S3') == 'True'
+
+if USE_S3:
+    STORAGES['default'] = {
+        'BACKEND': 'config.storage_backends.PrivateMediaStorage',
+        'OPTIONS': {
+            'access_key': os.getenv('AWS_ACCESS_KEY_ID'),
+            'secret_key': os.getenv('AWS_SECRET_ACCESS_KEY'),
+            'bucket_name': os.getenv('AWS_STORAGE_BUCKET_NAME'),
+            'endpoint_url': os.getenv('AWS_S3_ENDPOINT_URL'),
+        },
+    }
+else:
+    # Media settings
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

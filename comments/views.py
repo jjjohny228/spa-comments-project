@@ -16,7 +16,7 @@ class CommentListView(ListView):
     model = Comment
     template_name = 'comments/all_comments.html'
     context_object_name = 'comments'
-    paginate_by = 5  # Adjust the number of comments per page
+    paginate_by = 25  # Adjust the number of comments per page
 
     def get_queryset(self):
         order_by_element = self.request.GET.get('order_by')
@@ -71,4 +71,9 @@ class CommentFormView(FormMixin, View):
         new_comment.save()
         print('comment was saved')
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _("There was an error with your submission. Please correct the errors below."))
+        return render(self.request, 'comments/all_comments.html',
+                      {'comments_form': form, 'comments': self.get_queryset()})
 
